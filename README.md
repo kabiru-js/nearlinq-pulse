@@ -153,42 +153,8 @@ It is a system that becomes more correct the longer it runs.
 
 ---
 
-## What You Are Really Building
 
-Not a dashboard.
-Not an API.
-Not even a model.
 
-You are building a system that:
-
-* **observes biological reality**
-* **compresses it into signals**
-* **maps signals to outcomes**
-* **improves that mapping over time**
-
-In other words:
-
-> a primitive form of perception.
-
----
-
-## How to Think About Extending This
-
-Do not start with features.
-
-Start with questions:
-
-* What signals are missing?
-* What uncertainty remains unresolved?
-* What decisions are still too late?
-
-Then modify the system so that:
-
-* signals arrive earlier
-* interpretations become sharper
-* feedback becomes tighter
-
----
 
 ## The Long-Term Direction
 
