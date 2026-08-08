@@ -1,87 +1,222 @@
 # Nearling Pulse
 
-Livestock health monitoring system — sensor tags → your trained ML model → dashboard.
+Nearling Pulse is a system that attempts to observe life, in motion, under uncertainty.
 
-## Architecture
+It is built on a simple premise:
+**biological systems emit signals before they fail** — and if we learn to read those signals early enough, intervention becomes possible.
 
-```mermaid
-flowchart LR
-    S[Sensor tags] -->|POST /api/vitals| B[Next.js backend]
-    B -->|POST /predict| M[Your trained model server]
-    M -->|verdict + confidence| B
-    B --> P[(Postgres)]
-    B --> F[Frontend dashboard]
-```
+This repository is not just an application. It is a scaffold for a learning system.
 
-Three tiers, cleanly separated:
+---
 
-1. **Frontend** — the existing dashboard UI (Phase 0 mockup, preserved).
-2. **Backend** — Next.js route handlers (`app/api/*`) + Postgres (Drizzle ORM).
-3. **Model** — **trained by you**, served behind a documented HTTP contract. The backend calls it via `MODEL_API_URL`; a rule-based fallback keeps the system running until it's live.
+## What this is
 
-## Quickstart
+Nearling Pulse is a full-stack system for monitoring livestock health using streaming sensor data.
 
-```bash
-pnpm install
-docker compose up -d          # local Postgres (or point DATABASE_URL at Neon)
-cp .env.example .env
-pnpm db:push                   # create tables
-pnpm seed                      # seed the original mock animals into the DB
-pnpm dev                       # http://localhost:3000
-```
+At its core, it performs a continuous loop:
 
-Simulate live sensor data (in a second terminal):
+1. **Observe** — ingest raw physiological signals from animals
+2. **Interpret** — transform signals into structured meaning
+3. **Store** — accumulate history as memory
+4. **Reflect** — surface insights to humans
+5. **Learn** — improve interpretation using labeled outcomes
 
-```bash
-pnpm simulate
-```
+Over time, the system transitions from rules → models → intelligence.
 
-No database handy? Set `NEXT_PUBLIC_DEMO_MODE=true` in `.env` and run `pnpm dev` — the dashboard renders from the built-in mock data.
+---
 
-Wire up your model when ready — see `docs/MODEL_CONTRACT.md` and `model-server/`.
+## System Structure
 
-## Scripts
+The system is divided into three interacting layers:
 
-| Script | Purpose |
-|---|---|
-| `pnpm dev` | Dev server |
-| `pnpm lint` / `pnpm typecheck` / `pnpm build` | Quality gates |
-| `pnpm db:generate` / `pnpm db:migrate` / `pnpm db:push` | Drizzle migrations |
-| `pnpm seed` | Seed DB from the original mock data |
-| `pnpm simulate` | Emit jittered vitals to the ingestion API |
+### 1. Interface (Frontend)
 
-## API
+A reactive surface that reflects the current state of the herd.
 
-| Route | Purpose |
-|---|---|
-| `POST /api/auth/login` | Email+password login (sets session cookie) |
-| `POST /api/auth/logout` | Clears the session cookie |
-| `GET /api/auth/me` | Current session user |
-| `GET /api/animals` | Animals + latest vital (mirrors old mock shape) |
-| `GET /api/animals/[id]` | Detail + vitals history + checkups (mapped for charting) |
-| `GET /api/animals/[id]/checkups` | List check-ups |
-| `POST /api/animals/[id]/checkups` | Record a check-up (weight, notes, performed-by) |
-| `GET /api/dashboard` | Herd metrics |
-| `POST /api/vitals` | Sensor ingestion (needs org `X-Ingest-Key`) |
-| `GET /api/stream` | SSE — pushes `vitals` events when new readings land |
+* Does not reason
+* Does not infer
+* Only displays the consequence of inference
 
-Every API route is scoped to the session user's organization (`organizations`);
-sensor ingestion is scoped by the organization's ingest key. In demo mode
-(`NEXT_PUBLIC_DEMO_MODE=true`) the proxy skips auth so the UI works without a
-backend — set it only for local previews.
+This constraint is intentional.
 
-## Status
+The UI is not a source of truth.
+It is a **projection of truth computed elsewhere**.
 
-**All six roadmap phases are done** — the MVP is complete and CI-ready:
+---
 
-- Phase 0: tooling, branding, type-safe build
-- Phase 1: backend MVP (Postgres, API, model seam, seed, simulator)
-- Phase 2: frontend wired to the API (demo-mode fallback)
-- Phase 3: real-time (polling + SSE + change highlight)
-- Phase 4: check-up recording + vitals history charts
-- Phase 5: auth & multi-tenant (JWT sessions, org scoping, per-org ingest keys)
-- Phase 6: tests, CI, rate limiting, launch checklist
+### 2. Coordination Layer (Backend)
 
-**What's left:** train your model (`docs/TRAINING.md`), wire real sensor
-hardware, and deploy (`docs/LAUNCH-CHECKLIST.md`). The rules-based fallback
-keeps the product fully functional until your model is live.
+This is where decisions begin.
+
+* Accepts incoming signals
+* Validates and scopes them
+* Routes them into the analysis pipeline
+* Persists results
+
+It enforces structure on chaos.
+
+This layer defines *what counts as a valid observation*.
+
+---
+
+### 3. Inference Layer (Model)
+
+This is the most important layer, and initially the weakest.
+
+Today:
+
+* A deterministic rule-based system
+* Fixed thresholds
+* Predictable behavior
+
+Tomorrow:
+
+* A learned model
+* Probabilistic reasoning
+* Context-aware inference
+
+The system is designed so that **replacing the brain does not require rebuilding the body**.
+
+---
+
+## The Central Idea
+
+Most systems fail because they optimize for storage or visualization.
+
+Nearling Pulse optimizes for something else:
+
+> **the moment a signal becomes a decision**
+
+Everything in the architecture bends toward this.
+
+---
+
+## Data as a Learning Loop
+
+The system improves through feedback:
+
+* Sensors produce **inputs**
+* Veterinarians produce **ground truth**
+* The system aligns the two
+
+Check-ups are not just records.
+They are **labels**.
+
+Over time, the dataset becomes:
+
+* richer
+* more structured
+* more predictive
+
+And the model becomes less dependent on rules.
+
+---
+
+## Design Principles
+
+### 1. Separation of Concern Between Seeing and Knowing
+
+The frontend sees.
+The model knows.
+They do not overlap.
+
+---
+
+### 2. Replaceability of Intelligence
+
+The inference layer is a seam, not a dependency.
+
+You can:
+
+* remove it
+* replace it
+* upgrade it
+
+Without rewriting the system.
+
+---
+
+### 3. Graceful Degradation
+
+If the model fails, rules take over.
+
+The system never stops making decisions.
+It only changes how good they are.
+
+---
+
+### 4. Learning Over Time
+
+This is not a static product.
+
+It is a system that becomes more correct the longer it runs.
+
+---
+
+## What You Are Really Building
+
+Not a dashboard.
+Not an API.
+Not even a model.
+
+You are building a system that:
+
+* **observes biological reality**
+* **compresses it into signals**
+* **maps signals to outcomes**
+* **improves that mapping over time**
+
+In other words:
+
+> a primitive form of perception.
+
+---
+
+## How to Think About Extending This
+
+Do not start with features.
+
+Start with questions:
+
+* What signals are missing?
+* What uncertainty remains unresolved?
+* What decisions are still too late?
+
+Then modify the system so that:
+
+* signals arrive earlier
+* interpretations become sharper
+* feedback becomes tighter
+
+---
+
+## The Long-Term Direction
+
+If this system works, it evolves into:
+
+* early disease prediction
+* anomaly detection across populations
+* adaptive health baselines per animal
+* eventually, autonomous intervention systems
+
+The current implementation is only the beginning.
+
+---
+
+## Final Note
+
+Systems like this improve quietly.
+
+At first, they seem trivial:
+
+* thresholds
+* dashboards
+* simple alerts
+
+But with enough data and iteration, they begin to:
+
+* anticipate
+* generalize
+* and eventually, understand
+
+This repository is an early step in that direction.
