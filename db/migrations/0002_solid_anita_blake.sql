@@ -1,0 +1,1 @@
+ALTER TABLE "checkups" ADD COLUMN "verdict" text;

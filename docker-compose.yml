@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nearling
+      POSTGRES_PASSWORD: nearling_dev
+      POSTGRES_DB: nearling
+    ports:
+      - '5432:5432'
+    volumes:
+      - nearling_pgdata:/var/lib/postgresql/data
+
+volumes:
+  nearling_pgdata:
