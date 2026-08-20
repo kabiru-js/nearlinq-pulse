@@ -48,7 +48,17 @@ MODEL_API_URL=http://localhost:8000
 
 ## Notes
 
+- `scripts/train.py` saves a **dict** checkpoint `{model, thresholds, features}`
+  to `model.joblib`. The server applies tuned decision thresholds (instead
+  of plain argmax) and computes **temporal features** — a flattened window
+  of the last 7 readings (Phase 3) and/or trend aggregates (Phase 2) — from
+  a rolling per-animal history buffer that matches training exactly. So the
+  contract's input stays the 5 raw features even though the model sees
+  history. Cold-start padding (replicating the first reading) matches
+  training, so even the first readings get valid features.
+- A legacy plain-estimator checkpoint is still supported (raw features, argmax).
 - The model must expose `predict(X)` and ideally `predict_proba(X)` (sklearn-style). The server expects integer class labels `0/1/2` mapped to `healthy/warning/critical`.
 - `predict_proba` is optional; without it, confidence defaults to `1.0`.
 - Anything that serves the documented contract works — MLflow serve, ONNX Runtime, a PyTorch service, etc. See `docs/MODEL_CONTRACT.md`.
 - Checkpoints (`*.joblib`, `*.pkl`, `*.pt`, `*.onnx`) are gitignored — train locally, never commit weights.
+- The in-memory history buffer is per-process: with multiple server instances, each keeps its own view. Fine for a single-node deployment.

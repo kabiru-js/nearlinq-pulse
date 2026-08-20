@@ -16,6 +16,13 @@ __v0_jsx-dev-runtime.ts
 *.pt
 *.onnx
 
+# Generated ML datasets
+scripts/dataset.csv
+
+# Python
+__pycache__/
+*.pyc
+
 # Common ignores
 node_modules
 .next/
