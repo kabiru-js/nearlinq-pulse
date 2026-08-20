@@ -31,6 +31,38 @@ Skip neural networks, PyTorch, LLMs, and math courses entirely for now.
 
 ---
 
+## Status: a demo model already exists
+
+A working demonstration model has been trained and served end-to-end:
+
+- `scripts/generate-synthetic.py` creates a **simulated** labeled dataset
+  (5,760 readings; illness episodes plus feature interactions the rules
+  cannot express). The system has not run in the field yet, so real
+  labels don't exist — this is a stand-in so the pipeline can be proven.
+- `scripts/train.py` trains a calibrated RandomForest on it — Phase 3
+  design: the model sees the **flattened last-7 readings** (35 window
+  features, `--features window`) with auto-selected calibration and tuned
+  decision thresholds. Results on the animal-grouped test split: **accuracy
+  0.959 vs rule baseline 0.743**, critical recall 0.99, healthy precision
+  0.99; k-fold CV by animal ≈ 0.968. High-confidence predictions are
+  well-calibrated; mid-range bins remain slightly overconfident.
+- The calibrated model is saved to `model-server/model.joblib` and verified
+  serving `POST /predict` → `{ healthStatus, confidence, score, reasons }`.
+
+**This model is a DEMO. Its ground truth is invented.** It exists to prove
+that the whole loop works and to give you something concrete to study.
+Treat its verdicts as meaningless until it is retrained on real vet verdicts:
+
+1. Run the system; record check-ups **with verdicts**
+2. `DATABASE_URL=... pnpm dataset` — real export from the database
+3. `pnpm train` — overwrites `model-server/model.joblib` with the real model
+4. Serve + set `MODEL_API_URL` (Step 5 below)
+
+The rest of this document is the recipe for understanding and improving
+that model.
+
+---
+
 ## The pipeline (all plumbing is built for you)
 
 ```mermaid
